@@ -10,6 +10,14 @@
     <cn.sysmaster.mapsample.widget.MapLayout
         android:id="@+id/map_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"/>
+
+    <cn.sysmaster.mapsample.widget.BusinessView
+        android:id="@+id/business_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

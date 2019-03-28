@@ -8,7 +8,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import cn.sysmaster.mapsample.R;
+import cn.sysmaster.mapsample.model.DataInfo;
 
 /**
  * @author dabo
@@ -52,5 +55,24 @@ public class BusinessView extends LinearLayout {
         mTvCanBorrowAndroidNum = findViewById(R.id.can_borrow_android_num);
         mTvCanBorrowTypeCNum = findViewById(R.id.can_borrow_typec_num);
         mTvCanReturnNum = findViewById(R.id.can_return_num);
+
+        setVisibility(GONE);
+    }
+
+    public void setData(DataInfo model) {
+        DataInfo.BusinessBean bean = model.body;
+        if (bean == null) {
+            return;
+        }
+        setVisibility(VISIBLE);
+        Glide.with(getContext()).load(bean.logo).into(mImgBusiness);
+        mTvAddress.setText(bean.address);
+        mTvName.setText(bean.name);
+        mTvOpenTime.setText(bean.opening_hours);
+        mTvCanBorrowIOSNum.setText(bean.ios_can_borrow_num);
+        mTvCanBorrowAndroidNum.setText(bean.android_can_borrow_num);
+        mTvCanBorrowTypeCNum.setText(bean.typec_can_borrow_num);
+        mTvCanReturnNum.setText(bean.can_return_num);
+
     }
 }

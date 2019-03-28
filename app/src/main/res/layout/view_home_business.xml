@@ -8,6 +8,7 @@
         android:id="@+id/layout_order"
         android:layout_width="match_parent"
         android:layout_height="178.0dip"
+        android:background="#C0CA33"
         android:layout_gravity="bottom"
         android:gravity="bottom"
         android:orientation="vertical">
@@ -94,48 +95,69 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/can_borrow_ios_num"
-                android:layout_width="0.0dip"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:drawableLeft="@drawable/icon_iphone_60"
-                android:gravity="center"
-                android:textColor="#ff666666"
-                android:textSize="14.0sp"
-                tools:text="有"/>
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/can_borrow_ios_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_iphone_60"
+                    android:drawablePadding="5dp"
+                    android:gravity="center"
+                    android:textColor="#ff666666"
+                    android:textSize="14.0sp"
+                    tools:text="有"/>
+            </LinearLayout>
 
             <View
                 android:layout_width="0.33000004dip"
                 android:layout_height="15.0dip"
                 android:background="#dadada"/>
 
-            <TextView
-                android:id="@+id/can_borrow_android_num"
-                android:layout_width="0.0dip"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:drawableLeft="@drawable/icon_android_60"
-                android:gravity="center"
-                android:textColor="#ff666666"
-                android:textSize="14.0sp"
-                tools:text="有"/>
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/can_borrow_android_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_android_60"
+                    android:drawablePadding="5dp"
+                    android:gravity="center"
+                    android:textColor="#ff666666"
+                    android:textSize="14.0sp"
+                    tools:text="有"/>
+            </LinearLayout>
 
             <View
                 android:layout_width="0.33000004dip"
                 android:layout_height="15.0dip"
                 android:background="#dadada"/>
 
-            <TextView
-                android:id="@+id/can_borrow_typec_num"
-                android:layout_width="0.0dip"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:drawableLeft="@drawable/icon_typec_60"
-                android:gravity="center"
-                android:textColor="#ff666666"
-                android:textSize="14.0sp"
-                tools:text="有"/>
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/can_borrow_typec_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_typec_60"
+                    android:drawablePadding="5dp"
+                    android:gravity="center"
+                    android:textColor="#ff666666"
+                    android:textSize="14.0sp"
+                    tools:text="有"/>
+            </LinearLayout>
 
             <View
                 android:layout_width="0.33000004dip"

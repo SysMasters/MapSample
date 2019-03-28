@@ -3,6 +3,7 @@ package cn.sysmaster.mapsample;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -13,7 +14,9 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.sysmaster.mapsample.model.DataInfo;
 import cn.sysmaster.mapsample.model.ResponseModel;
+import cn.sysmaster.mapsample.widget.BusinessView;
 import cn.sysmaster.mapsample.widget.MapLayout;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private BusinessView mBusinessView;
     private MapLayout mMapLayout;
 
     @Override
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mBusinessView = findViewById(R.id.business_view);
         mMapLayout = findViewById(R.id.map_layout);
         mMapLayout.setOnMapStatusChanageFinishListener(new MapLayout.OnMapStatusChanageFinishListener() {
             @Override
@@ -42,8 +47,13 @@ public class MainActivity extends AppCompatActivity {
         });
         mMapLayout.setOnMarkerClickListener(new MapLayout.OnMarkerClickListener() {
             @Override
-            public void onClick(String uuid, LatLng latLng) {
+            public void onMarkerClick(String uuid, LatLng latLng) {
                 getUnitDataInfo(uuid);
+            }
+
+            @Override
+            public void onClick(LatLng latLng) {
+                mBusinessView.setVisibility(View.GONE);
             }
         });
     }
@@ -138,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(String response, int id) {
-                        ResponseModel model = JSON.parseObject(response, ResponseModel.class);
-                        mMapLayout.setMarkerDaces(model.body.business);
+                        DataInfo model = JSON.parseObject(response, DataInfo.class);
+//                        mBusinessView.setData(model);
                     }
                 });
     }

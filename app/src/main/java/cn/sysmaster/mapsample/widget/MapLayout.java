@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -27,6 +26,7 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -154,8 +154,8 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
         // marker点击监听
         mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
-        // 地图触摸监听
-        mBaiduMap.setOnMapTouchListener(mOnMapTouchListener);
+        // 地图点击监听
+        mBaiduMap.setOnMapClickListener(mOnMapClickListener);
 
         // 设置定位相关
         // 开启定位图层
@@ -175,21 +175,24 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         addView(mMapView);
     }
 
-    /**
-     * 地图触摸监听
-     */
-    private BaiduMap.OnMapTouchListener mOnMapTouchListener = new BaiduMap.OnMapTouchListener() {
+
+    private BaiduMap.OnMapClickListener mOnMapClickListener = new BaiduMap.OnMapClickListener() {
         @Override
-        public void onTouch(MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                // 触摸还原marker图标
-                if (mCurrClickMarker != null && mCurrClickBitmap != null) {
-                    mCurrClickMarker.setIcon(mCurrClickBitmap);
-                }
+        public void onMapClick(LatLng latLng) {
+            // 触摸还原marker图标
+            if (mCurrClickMarker != null && mCurrClickBitmap != null) {
+                mCurrClickMarker.setIcon(mCurrClickBitmap);
+            }
+            if (mMarkerClickListener != null){
+                mMarkerClickListener.onClick(latLng);
             }
         }
-    };
 
+        @Override
+        public boolean onMapPoiClick(MapPoi mapPoi) {
+            return false;
+        }
+    };
 
     /**
      * 地图状态监听
@@ -240,7 +243,7 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
             // 当前marker坐标
             LatLng latLng = marker.getPosition();
             if (null != mMarkerClickListener) {
-                mMarkerClickListener.onClick(uuid, latLng);
+                mMarkerClickListener.onMarkerClick(uuid, latLng);
             }
             return false;
         }
@@ -301,19 +304,19 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         mMapView.onPause();
     }
 
-    protected void onResume() {
+    public void onResume() {
         mMapView.onResume();
         //为系统的方向传感器注册监听器
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
                 SensorManager.SENSOR_DELAY_UI);
     }
 
-    protected void onStop() {
+    public void onStop() {
         //取消注册传感器监听
         mSensorManager.unregisterListener(this);
     }
 
-    protected void onDestroy() {
+    public void onDestroy() {
         // 退出时销毁定位
         mLocClient.stop();
         // 关闭定位图层
@@ -401,7 +404,8 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
     }
 
     public interface OnMarkerClickListener {
-        void onClick(String uuid, LatLng latLng);
+        void onMarkerClick(String uuid, LatLng latLng);
+        void onClick(LatLng latLng);
     }
 
     public void setOnMapStatusChanageFinishListener(OnMapStatusChanageFinishListener onMapStatusChanageFinishListener) {
