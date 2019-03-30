@@ -37,6 +37,16 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
+import com.baidu.mapapi.search.route.BikingRouteResult;
+import com.baidu.mapapi.search.route.DrivingRouteResult;
+import com.baidu.mapapi.search.route.IndoorRouteResult;
+import com.baidu.mapapi.search.route.MassTransitRouteResult;
+import com.baidu.mapapi.search.route.OnGetRoutePlanResultListener;
+import com.baidu.mapapi.search.route.PlanNode;
+import com.baidu.mapapi.search.route.RoutePlanSearch;
+import com.baidu.mapapi.search.route.TransitRouteResult;
+import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
+import com.baidu.mapapi.search.route.WalkingRouteResult;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -46,6 +56,7 @@ import java.util.List;
 
 import cn.sysmaster.mapsample.R;
 import cn.sysmaster.mapsample.model.ResponseModel;
+import cn.sysmaster.mapsample.overlayutil.WalkingRouteOverlay;
 import cn.sysmaster.mapsample.util.DensityUtils;
 
 /**
@@ -59,6 +70,9 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
     private BaiduMap mBaiduMap;
     private LocationClient mLocClient;
 
+    /**
+     * 当前定位经纬度
+     */
     private double mCurrentLat = 0.0;
     private double mCurrentLon = 0.0;
     private float mCurrentAccracy;
@@ -68,7 +82,14 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
     private float mCurrentDirection = 0;
     private Double lastX = 0.0;
     private SensorManager mSensorManager;
-
+    /**
+     * 路径规划检索实例
+     */
+    private RoutePlanSearch mRoutePlanSearch;
+    /**
+     * 步行路径显示覆盖
+     */
+    private WalkingRouteOverlay mOverlay;
 
     /**
      * 当前点击的marker
@@ -172,10 +193,57 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         mLocClient.setLocOption(option);
         mLocClient.start();
 
+        // 线路规划检索实例
+        mRoutePlanSearch = RoutePlanSearch.newInstance();
+        mRoutePlanSearch.setOnGetRoutePlanResultListener(mOnGetRoutePlanResultListener);
+
         addView(mMapView);
+        mOverlay = new WalkingRouteOverlay(mBaiduMap);
     }
 
+    /**
+     * 路线规划检索结果监听器
+     */
+    private OnGetRoutePlanResultListener mOnGetRoutePlanResultListener = new OnGetRoutePlanResultListener() {
+        @Override
+        public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
+            if (walkingRouteResult.getRouteLines().size() > 0) {
+                //获取路径规划数据,(以返回的第一条数据为例)
+                //为WalkingRouteOverlay实例设置路径数据
+                mOverlay.setData(walkingRouteResult.getRouteLines().get(0));
+                //在地图上绘制WalkingRouteOverlay
+                mOverlay.addToMap();
+            }
+        }
 
+        @Override
+        public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+
+        }
+
+        @Override
+        public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
+
+        }
+
+        @Override
+        public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+
+        }
+    };
+    /**
+     * 地图点击监听
+     */
     private BaiduMap.OnMapClickListener mOnMapClickListener = new BaiduMap.OnMapClickListener() {
         @Override
         public void onMapClick(LatLng latLng) {
@@ -183,7 +251,7 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
             if (mCurrClickMarker != null && mCurrClickBitmap != null) {
                 mCurrClickMarker.setIcon(mCurrClickBitmap);
             }
-            if (mMarkerClickListener != null){
+            if (mMarkerClickListener != null) {
                 mMarkerClickListener.onClick(latLng);
             }
         }
@@ -223,8 +291,8 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
                     mOnMapStatusChanageFinishListener.onFinish(latLng);
                 }
             }
-            mCurrentLat = latLng.latitude;
-            mCurrentLon = latLng.longitude;
+            //            mCurrentLat = latLng.latitude;
+            //            mCurrentLon = latLng.longitude;
         }
     };
 
@@ -234,6 +302,11 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
     private BaiduMap.OnMarkerClickListener mOnMarkerClickListener = new BaiduMap.OnMarkerClickListener() {
         @Override
         public boolean onMarkerClick(Marker marker) {
+            // 还原marker图标
+            if (mCurrClickMarker != null && mCurrClickBitmap != null) {
+                mCurrClickMarker.setIcon(mCurrClickBitmap);
+            }
+            // 设置当前marker图标
             mCurrClickMarker = marker;
             mCurrClickBitmap = marker.getIcon();
             BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory
@@ -242,9 +315,16 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
             String uuid = marker.getExtraInfo().getString("uuid");
             // 当前marker坐标
             LatLng latLng = marker.getPosition();
+            // 暴露点击监听
             if (null != mMarkerClickListener) {
                 mMarkerClickListener.onMarkerClick(uuid, latLng);
             }
+            // 步行路径规划
+            PlanNode sNode = PlanNode.withLocation(latLng);
+            PlanNode eNode = PlanNode.withLocation(new LatLng(mCurrentLat, mCurrentLon));
+            mRoutePlanSearch.walkingSearch(new WalkingRoutePlanOption()
+                    .from(sNode)
+                    .to(eNode));
             return false;
         }
     };
@@ -320,6 +400,7 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         // 退出时销毁定位
         mLocClient.stop();
         // 关闭定位图层
+        mRoutePlanSearch.destroy();
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
         mMapView = null;
@@ -405,6 +486,7 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
 
     public interface OnMarkerClickListener {
         void onMarkerClick(String uuid, LatLng latLng);
+
         void onClick(LatLng latLng);
     }
 
