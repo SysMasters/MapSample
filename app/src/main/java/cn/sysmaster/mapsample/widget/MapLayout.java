@@ -132,6 +132,12 @@ public class MapLayout extends FrameLayout implements SensorEventListener {
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
         addView(imageView, layoutParams);
+
+        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        imageView.measure(w, h);
+        int halfH = imageView.getMeasuredHeight() / 2;
+        imageView.setPadding(0, 0, 0, halfH);
     }
 
     /**
